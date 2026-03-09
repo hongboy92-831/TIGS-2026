@@ -81,7 +81,8 @@
                 'footprints': <path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0ZM20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z M16 17h4 M4 13h4" />,
                 'smartphone': <path d="M5 4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4z M12 18h.01" />,
                 'scan-line': <path d="M3 7V5a2 2 0 0 1 2-2h2 M17 3h2a2 2 0 0 1 2 2v2 M21 17v2a2 2 0 0 1-2 2h-2 M7 21H5a2 2 0 0 1-2-2v-2 M7 12h10" />,
-                'external-link': <path d="M15 3h6v6 M10 14 21 3 M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                'external-link': <path d="M15 3h6v6 M10 14 21 3 M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />,
+                'loader': <path d="M12 2v4 M12 18v4 M4.93 4.93l2.83 2.83 M16.24 16.24l2.83 2.83 M2 12h4 M18 12h4 M4.93 19.07l2.83-2.83 M16.24 7.76l2.83-2.83" />
             };
 
             return (
@@ -106,8 +107,9 @@
             const [activeTab, setActiveTab] = useState('overview');
             const [timeLeft, setTimeLeft] = useState('');
             const [weatherData, setWeatherData] = useState([]);
+            const [isWeatherLoading, setIsWeatherLoading] = useState(true);
 
-            const VERSION = "v2.19.0";
+            const VERSION = "v2.20.0";
             const TICKET_QR_URL = "https://l-tike.com/qr/reserved/?page=669698055061";
             const HOTEL_MAP_URL = "https://www.google.com/maps/search/?api=1&query=Shinjuku+Washington+Hotel+Main+Building";
             const EXHIBITION_MAP_URL = "https://www.google.com/maps/search/?api=1&query=IMAGINUS+Suginami+Science+Education+Center";
@@ -134,15 +136,64 @@
                 ]
             };
 
+            // 即時天氣獲取 (Open-Meteo)
             useEffect(() => {
-                const mock = [
-                    { date: '3/19', day: '四', temp: '12°/5°', icon: 'cloud-sun', color: 'text-stone-500' },
-                    { date: '3/20', day: '五', temp: '14°/6°', icon: 'sun', color: 'text-stone-500' },
-                    { date: '3/21', day: '六', temp: '11°/7°', icon: 'cloud-rain', color: 'text-stone-400' },
-                    { date: '3/22', day: '日', temp: '13°/5°', icon: 'cloud', color: 'text-stone-400' },
-                ];
-                setWeatherData(mock);
+                const fetchWeather = async () => {
+                    setIsWeatherLoading(true);
+                    try {
+                        // 抓取包含 3/19-3/22 的 16 天預報
+                        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&forecast_days=16');
+                        const data = await res.json();
+                        
+                        const targetDates = ['2026-03-19', '2026-03-20', '2026-03-21', '2026-03-22'];
+                        const labels = ['3/19 (四)', '3/20 (五)', '3/21 (六)', '3/22 (日)'];
 
+                        const mappedWeather = targetDates.map((dateStr, index) => {
+                            const dayIdx = data.daily.time.indexOf(dateStr);
+                            if (dayIdx !== -1) {
+                                const maxT = Math.round(data.daily.temperature_2m_max[dayIdx]);
+                                const minT = Math.round(data.daily.temperature_2m_min[dayIdx]);
+                                const code = data.daily.weather_code[dayIdx];
+                                
+                                let icon = 'cloud';
+                                let color = 'text-stone-400';
+                                
+                                if (code === 0 || code === 1) { 
+                                    icon = 'sun'; color = 'text-amber-500'; 
+                                } else if (code === 2 || code === 3) { 
+                                    icon = 'cloud-sun'; color = 'text-stone-500'; 
+                                } else if (code >= 50 && code <= 99) { 
+                                    icon = 'cloud-rain'; color = 'text-slate-500'; 
+                                }
+
+                                return { date: labels[index], temp: `${maxT}°/${minT}°`, icon, color };
+                            }
+                            return null;
+                        }).filter(Boolean);
+
+                        if (mappedWeather.length === 4) {
+                            setWeatherData(mappedWeather);
+                        } else {
+                            throw new Error("Dates out of bounds");
+                        }
+                    } catch (err) {
+                        // 失敗時使用優雅的備用資料
+                        setWeatherData([
+                            { date: '3/19 (四)', temp: '14°/5°', icon: 'cloud-sun', color: 'text-stone-500' },
+                            { date: '3/20 (五)', temp: '16°/7°', icon: 'sun', color: 'text-amber-500' },
+                            { date: '3/21 (六)', temp: '15°/8°', icon: 'cloud', color: 'text-stone-400' },
+                            { date: '3/22 (日)', temp: '13°/6°', icon: 'cloud-rain', color: 'text-slate-500' },
+                        ]);
+                    } finally {
+                        setIsWeatherLoading(false);
+                    }
+                };
+
+                fetchWeather();
+            }, []);
+
+            // 倒數計時功能
+            useEffect(() => {
                 const targetDate = new Date('2026-03-19T12:50:00').getTime();
                 const timer = setInterval(() => {
                     const now = new Date().getTime();
@@ -187,13 +238,18 @@
                                 </div>
 
                                 <section>
-                                    <h3 className="text-xl font-serif-tc font-bold text-stone-800 mb-3 px-1 flex items-center gap-2"><SafeIcon name="cloud-sun" size={22} className="text-stone-500" /> 東京預報</h3>
+                                    <h3 className="text-xl font-serif-tc font-bold text-stone-800 mb-3 px-1 flex items-center gap-2">
+                                        <SafeIcon name="cloud-sun" size={22} className="text-stone-500" /> 東京預報 
+                                        {isWeatherLoading && <span className="text-[10px] bg-stone-200 text-stone-600 px-2 py-0.5 rounded-full ml-1">即時更新中...</span>}
+                                    </h3>
                                     <div className="flex overflow-x-auto gap-3 pb-4 no-scrollbar px-1">
                                         {weatherData.map((w, i) => (
                                             <div key={i} className="min-w-[100px] bg-white p-5 rounded-3xl shadow-soft border border-stone-100 flex flex-col items-center text-center">
                                                 <p className="text-xs font-bold text-stone-400 tracking-wider">{w.date}</p>
-                                                <div className="my-3 text-stone-600"><SafeIcon name={w.icon} size={28} /></div>
-                                                <p className="font-bold text-[15px] text-stone-800">{w.temp}</p>
+                                                <div className="my-3 text-stone-600">
+                                                    {isWeatherLoading ? <SafeIcon name="loader" size={24} className="animate-spin text-stone-300" /> : <SafeIcon name={w.icon} size={28} className={w.color} />}
+                                                </div>
+                                                <p className="font-bold text-[15px] text-stone-800">{isWeatherLoading ? '--' : w.temp}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -457,8 +513,8 @@
             };
 
             return (
-                <div className="max-w-md mx-auto h-screen flex flex-col relative overflow-hidden">
-                    <header className="bg-[#F5F4F0]/90 backdrop-blur-md px-6 pt-6 pb-4 flex justify-between items-center z-20">
+                <div className="max-w-md mx-auto h-[100dvh] flex flex-col relative overflow-hidden bg-[#F5F4F0]">
+                    <header className="bg-[#F5F4F0]/95 backdrop-blur-md px-6 pt-6 pb-4 flex justify-between items-center z-20">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-stone-800 rounded-[14px] flex items-center justify-center text-white font-serif-tc font-bold text-sm shadow-sm tracking-widest">TO</div>
                             <div><h1 className="text-[17px] font-bold tracking-widest uppercase leading-none font-serif-tc">TIGS 2026</h1></div>
@@ -466,12 +522,13 @@
                         <div className="text-[10px] font-bold text-stone-400 border border-stone-200 px-2.5 py-1 rounded-lg tracking-widest bg-white">{VERSION}</div>
                     </header>
                     
-                    <main className="flex-1 p-5 overflow-y-auto no-scrollbar pb-24 relative z-10">
+                    {/* 增加 padding-bottom 確保不會被 fixed 選單遮住 */}
+                    <main className="flex-1 p-5 overflow-y-auto no-scrollbar pb-28 relative z-10">
                         {renderContent()}
                     </main>
 
-                    {/* 文青質感底部導覽列 */}
-                    <nav className="absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-stone-100 flex justify-around px-2 pb-safe pt-2 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] z-30">
+                    {/* 文青質感底部導覽列 (徹底固定於底部) */}
+                    <nav className="fixed bottom-0 w-full max-w-md left-1/2 -translate-x-1/2 bg-[#F5F4F0]/95 backdrop-blur-xl border-t border-stone-200 flex justify-around px-2 pb-safe pt-2 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-[100]">
                         {[
                             { id: 'overview', icon: 'briefcase', label: '首頁' },
                             { id: 'schedule', icon: 'calendar', label: '行程' },
@@ -480,7 +537,7 @@
                             { id: 'food', icon: 'utensils', label: '美食' },
                         ].map((tab) => (
                             <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex flex-col items-center justify-center flex-1 py-2 transition-all duration-300 relative ${activeTab === tab.id ? 'text-slate-700' : 'text-stone-400'}`}>
-                                <div className={`p-2 rounded-xl transition-all duration-300 ${activeTab === tab.id ? 'bg-slate-100' : 'bg-transparent'}`}>
+                                <div className={`p-2 rounded-xl transition-all duration-300 ${activeTab === tab.id ? 'bg-slate-200/70' : 'bg-transparent'}`}>
                                     <SafeIcon name={tab.icon} size={22} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
                                 </div>
                                 <span className={`text-[10px] mt-1 font-bold tracking-widest transition-all duration-300 ${activeTab === tab.id ? 'opacity-100' : 'opacity-0 scale-90 h-0 overflow-hidden'}`}>{tab.label}</span>
@@ -496,3 +553,6 @@
     </script>
 </body>
 </html>
+
+
+
