@@ -54,7 +54,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo, useRef } = React;
         
         /**
          * 內建 SVG 圖示庫 (保證 100% 穩定，絕不失效)
@@ -108,8 +108,9 @@
             const [timeLeft, setTimeLeft] = useState('');
             const [weatherData, setWeatherData] = useState([]);
             const [isWeatherLoading, setIsWeatherLoading] = useState(true);
+            const mainScrollRef = useRef(null);
 
-            const VERSION = "v2.20.0";
+            const VERSION = "v2.21.0";
             const TICKET_QR_URL = "https://l-tike.com/qr/reserved/?page=669698055061";
             const HOTEL_MAP_URL = "https://www.google.com/maps/search/?api=1&query=Shinjuku+Washington+Hotel+Main+Building";
             const EXHIBITION_MAP_URL = "https://www.google.com/maps/search/?api=1&query=IMAGINUS+Suginami+Science+Education+Center";
@@ -136,12 +137,18 @@
                 ]
             };
 
+            // 監聽 activeTab 變更，自動將主內容區塊捲動至頂部
+            useEffect(() => {
+                if (mainScrollRef.current) {
+                    mainScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }, [activeTab]);
+
             // 即時天氣獲取 (Open-Meteo)
             useEffect(() => {
                 const fetchWeather = async () => {
                     setIsWeatherLoading(true);
                     try {
-                        // 抓取包含 3/19-3/22 的 16 天預報
                         const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&forecast_days=16');
                         const data = await res.json();
                         
@@ -177,7 +184,6 @@
                             throw new Error("Dates out of bounds");
                         }
                     } catch (err) {
-                        // 失敗時使用優雅的備用資料
                         setWeatherData([
                             { date: '3/19 (四)', temp: '14°/5°', icon: 'cloud-sun', color: 'text-stone-500' },
                             { date: '3/20 (五)', temp: '16°/7°', icon: 'sun', color: 'text-amber-500' },
@@ -214,7 +220,7 @@
                 switch (activeTab) {
                     case 'overview':
                         return (
-                            <div className="space-y-6 fade-in pb-6">
+                            <div className="space-y-6 fade-in pb-6 text-gray-800">
                                 {/* 文青風格首圖卡片 */}
                                 <div className="bg-stone-800 p-6 rounded-[2rem] text-white shadow-soft relative overflow-hidden min-h-[180px] flex flex-col justify-end">
                                     <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=800&auto=format&fit=crop" alt="Tokyo" className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />
@@ -227,14 +233,6 @@
                                             <span className="font-mono font-bold text-lg tracking-wider">{timeLeft}</span>
                                         </div>
                                     </div>
-                                </div>
-
-                                <div onClick={() => setActiveTab('tickets')} className="bg-[#FAF8F5] border border-[#E8E6DF] p-5 rounded-3xl flex items-center justify-between cursor-pointer active:scale-95 transition-transform shadow-soft">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-stone-700 rounded-2xl flex items-center justify-center text-white shadow-sm"><SafeIcon name="ticket" size={22} /></div>
-                                        <div><p className="text-xs font-bold text-stone-500 uppercase tracking-widest">Ticket Entry</p><p className="font-bold text-lg text-stone-800 font-serif-tc mt-0.5">TIGS 2026 入場券</p></div>
-                                    </div>
-                                    <SafeIcon name="chevron-right" size={20} className="text-stone-400" />
                                 </div>
 
                                 <section>
@@ -298,6 +296,15 @@
                                         </a>
                                     </div>
                                 </section>
+
+                                {/* 將 Ticket Entry 移至首頁最下方 */}
+                                <div onClick={() => setActiveTab('tickets')} className="bg-[#FAF8F5] border border-[#E8E6DF] p-5 rounded-3xl flex items-center justify-between cursor-pointer active:scale-95 transition-transform shadow-soft mt-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-stone-700 rounded-2xl flex items-center justify-center text-white shadow-sm"><SafeIcon name="ticket" size={22} /></div>
+                                        <div><p className="text-xs font-bold text-stone-500 uppercase tracking-widest">Ticket Entry</p><p className="font-bold text-lg text-stone-800 font-serif-tc mt-0.5">TIGS 2026 入場券</p></div>
+                                    </div>
+                                    <SafeIcon name="chevron-right" size={20} className="text-stone-400" />
+                                </div>
                             </div>
                         );
 
@@ -365,7 +372,7 @@
                                     </div>
                                 </div>
 
-                                {/* 機場到飯店 完美補上icon */}
+                                {/* 機場到飯店 */}
                                 <div className="bg-white rounded-3xl p-6 shadow-soft border border-stone-100">
                                     <div className="flex items-center gap-3 mb-6"><div className="w-12 h-12 bg-stone-100 rounded-2xl flex items-center justify-center text-stone-600"><SafeIcon name="plane" size={20} /></div><h4 className="font-bold text-xl font-serif-tc tracking-wide">去程：機場 {"->"} 飯店</h4></div>
                                     <div className="space-y-8 relative ml-4 border-l border-dashed border-stone-300 pl-8 text-[15px]">
@@ -440,31 +447,31 @@
                     case 'food':
                         return (
                             <div className="space-y-5 fade-in pb-10 text-stone-800">
-                                {/* 頂部美學圖片 */}
-                                <div className="w-full h-32 rounded-3xl overflow-hidden relative mb-2 shadow-soft">
-                                    <img src="https://images.unsplash.com/photo-1617450365226-9bf28c04e130?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover opacity-90" alt="Japanese Food" />
-                                    <div className="absolute inset-0 bg-stone-900/40 flex items-center px-6">
+                                {/* 更換為令人食指大動的美食(拉麵/和食)圖片橫幅 */}
+                                <div className="w-full h-36 rounded-3xl overflow-hidden relative mb-2 shadow-soft">
+                                    <img src="https://images.unsplash.com/photo-1558985250-27a406d64cb3?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover opacity-90" alt="Japanese Food" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-stone-900/80 to-stone-900/20 flex items-end px-6 pb-5">
                                         <h2 className="text-2xl font-serif-tc font-bold text-white tracking-widest">平價人氣美食</h2>
                                     </div>
                                 </div>
 
                                 {[
-                                    { name: "ねぎし (Negishi) 牛舌", tag: "商務首選", transport: "從飯店步行約 12 分鐘，或由西口 21 號搭乘 WE Bus 至「新宿站西口」步行 2 分即可。", link: FOOD_LINKS.negishi },
-                                    { name: "風雲兒 (Fuunji) 沾麵", tag: "排隊名店", transport: "從飯店步行僅約 8 分鐘即可抵達，位於西新宿區域。", link: FOOD_LINKS.fuunji },
-                                    { name: "うどん 慎 (Udon Shin)", tag: "IG 網紅店", transport: "從飯店步行約 10 分鐘，接近新宿南口巷弄區域。", link: FOOD_LINKS.udonshin },
-                                    { name: "牛かつ もと村 炸牛排", tag: "超高評價", transport: "從飯店步行約 12 分鐘，位於新宿南口斜坡巷弄中。", link: FOOD_LINKS.motomura },
-                                    { name: "麵屋武藏 二天", tag: "男性喜愛", transport: "從飯店步行約 15 分鐘，位於新宿站西口繁華商業街。", link: FOOD_LINKS.musashi }
+                                    { name: "ねぎし (Negishi) 牛舌", tag: "商務首選", desc: "炭烤厚切牛舌定食，附贈香Q麥飯與清爽山藥泥", transport: "從飯店步行約 12 分鐘，或由西口 21 號搭乘 WE Bus 至「新宿站西口」步行 2 分即可。", link: FOOD_LINKS.negishi },
+                                    { name: "風雲兒 (Fuunji) 沾麵", tag: "排隊名店", desc: "西新宿排隊傳奇，超濃郁雞白湯魚介特製沾麵", transport: "從飯店步行僅約 8 分鐘即可抵達，位於西新宿區域。", link: FOOD_LINKS.fuunji },
+                                    { name: "うどん 慎 (Udon Shin)", tag: "IG 網紅店", desc: "現點現打現切，擺盤如藝術品般的晶瑩剔透烏龍麵", transport: "從飯店步行約 10 分鐘，接近新宿南口巷弄區域。", link: FOOD_LINKS.udonshin },
+                                    { name: "牛かつ もと村 炸牛排", tag: "超高評價", desc: "外酥內嫩的極品炸牛排，可於桌上小石板自行加熱熟度", transport: "從飯店步行約 12 分鐘，位於新宿南口斜坡巷弄中。", link: FOOD_LINKS.motomura },
+                                    { name: "麵屋武藏 二天", tag: "男性喜愛", desc: "豪邁大份量的武士風格，主打厚實多汁滷肉叉燒拉麵", transport: "從飯店步行約 15 分鐘，位於新宿站西口繁華商業街。", link: FOOD_LINKS.musashi }
                                 ].map((food, i) => (
                                     <div key={i} className="bg-white rounded-3xl p-6 shadow-soft border border-stone-100 flex flex-col gap-4">
                                         <div>
                                             <span className="text-[10px] font-bold uppercase px-2.5 py-1 rounded bg-stone-100 text-stone-500 mb-2.5 inline-block tracking-widest">{food.tag}</span>
-                                            <h4 className="font-bold text-xl text-stone-800 font-serif-tc tracking-wide">{food.name}</h4>
+                                            <h4 className="font-bold text-xl text-stone-800 font-serif-tc tracking-wide mb-1">{food.name}</h4>
+                                            <p className="text-[14px] text-stone-500 font-bold mb-1 leading-relaxed">{food.desc}</p>
                                         </div>
                                         <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-stone-100">
                                             <p className="text-xs font-bold text-stone-400 tracking-widest mb-1.5 flex items-center gap-1.5"><SafeIcon name="footprints" size={12} /> 步行指引</p>
                                             <p className="text-[14px] text-stone-600 font-medium leading-relaxed">{food.transport}</p>
                                         </div>
-                                        {/* 文青版「前往導航」實體按鈕 */}
                                         <div className="pt-1 flex justify-end">
                                             <a href={food.link} target="_blank" className="inline-flex items-center gap-2 bg-slate-700 text-white px-5 py-2.5 rounded-xl font-bold text-[14px] shadow-sm active:bg-slate-800 transition-colors">
                                                 前往導航 <SafeIcon name="navigation" size={14} />
@@ -478,7 +485,7 @@
                     case 'tickets':
                         return (
                             <div className="space-y-6 fade-in pb-10 text-stone-800 font-medium">
-                                <h2 className="text-2xl font-serif-tc font-bold px-2 tracking-wide flex items-center gap-2"><SafeIcon name="ticket" className="text-amber-600" size={24} /> 門票領取教學</h2>
+                                <h2 className="text-2xl font-serif-tc font-bold px-2 tracking-wide flex items-center gap-2"><SafeIcon name="ticket" className="text-amber-600" size={24} /> 門票領取</h2>
                                 <div className="bg-white rounded-3xl p-6 shadow-soft border border-amber-100/50">
                                     <div className="flex items-center gap-3 mb-6"><div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-700 border border-amber-100"><SafeIcon name="qr-code" size={22} /></div><h4 className="font-bold text-xl font-serif-tc tracking-wide">Lawson / MINISTOP</h4></div>
                                     <div className="space-y-8 relative ml-4 border-l border-dashed border-stone-200 pl-8 text-[15px] leading-relaxed">
@@ -487,7 +494,7 @@
                                                 <SafeIcon name="smartphone" size={12} className="text-white" />
                                             </div>
                                             <p className="font-bold text-lg text-stone-800">步驟 1：開啟憑證</p>
-                                            <a href={TICKET_QR_URL} target="_blank" className="mt-3 inline-flex items-center justify-center gap-2 bg-slate-700 text-white px-6 py-3.5 rounded-xl font-bold text-[15px] shadow-sm active:bg-slate-800 transition-colors w-full tracking-wide">開啟QR證畫面 <SafeIcon name="chevron-right" size={16} /></a>
+                                            <a href={TICKET_QR_URL} target="_blank" className="mt-3 inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3.5 rounded-xl font-bold text-[15px] shadow-md active:bg-blue-700 transition-colors w-full tracking-wide">開啟QR證畫面 <SafeIcon name="chevron-right" size={16} /></a>
                                         </div>
                                         <div className="relative">
                                             <div className="absolute -left-[45px] top-0 w-7 h-7 rounded-full bg-stone-400 border-[3px] border-white shadow-sm flex items-center justify-center">
@@ -522,8 +529,8 @@
                         <div className="text-[10px] font-bold text-stone-400 border border-stone-200 px-2.5 py-1 rounded-lg tracking-widest bg-white">{VERSION}</div>
                     </header>
                     
-                    {/* 增加 padding-bottom 確保不會被 fixed 選單遮住 */}
-                    <main className="flex-1 p-5 overflow-y-auto no-scrollbar pb-28 relative z-10">
+                    {/* 加入 ref 綁定，用以觸發捲動至頂部 */}
+                    <main ref={mainScrollRef} className="flex-1 p-5 overflow-y-auto no-scrollbar pb-28 relative z-10 scroll-smooth">
                         {renderContent()}
                     </main>
 
@@ -553,6 +560,3 @@
     </script>
 </body>
 </html>
-
-
-
