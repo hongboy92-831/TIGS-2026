@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
     
     <style>
-        /* 導入現代無襯線與優雅明體 (文青風格) */
+        /* 導入現代無襯線與優雅明體 */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@500;700&display=swap');
         
         body {
@@ -50,7 +50,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo, useRef } = React;
+        const { useState, useEffect, useRef } = React;
         
         const SafeIcon = ({ name, size = 24, className = "", strokeWidth = 2 }) => {
             const icons = {
@@ -70,7 +70,7 @@
                 'map-pin': <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />,
                 'navigation': <path d="m3 11 19-9-9 19-2-8-8-2z" />,
                 'arrow-right-left': <path d="m16 3 4 4-4 4 M20 7H4 M8 21l-4-4 4-4 M4 17h16" />,
-                'sparkles': <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z M5 3l.733 2.2a.5.5 0 0 1-.333.667L3 6l2.4.8a.5.5 0 0 1 .333.667L6 9l.733-2.2a.5.5 0 0 1 .333-.667L6 3Z" />,
+                'sparkles': <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z M5 3l.733 2.2a.5.5 0 0 1-.333.667L3 6l2.4.8a.5.5 0 0 1 .333.667L6 9l.733-2.2a.5.5 0 0 1 .333-.667L9 6l-2.4-.8a.5.5 0 0 1-.333-.667L6 3Z" />,
                 'footprints': <path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0ZM20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z M16 17h4 M4 13h4" />,
                 'smartphone': <path d="M5 4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4z M12 18h.01" />,
                 'scan-line': <path d="M3 7V5a2 2 0 0 1 2-2h2 M17 3h2a2 2 0 0 1 2 2v2 M21 17v2a2 2 0 0 1-2 2h-2 M7 21H5a2 2 0 0 1-2-2v-2 M7 12h10" />,
@@ -107,8 +107,9 @@
             const [isWeatherLoading, setIsWeatherLoading] = useState(true);
             const mainRef = useRef(null);
 
-            const VERSION = "v2.30.0";
+            const VERSION = "v2.34.0";
             const TICKET_QR_URL = "https://l-tike.com/qr/reserved/?page=669698055061";
+            const TRAIN_TICKET_URL = "https://drive.google.com/file/d/1iiaPHAhFgGanwmOgcAgvw5MpMeLMJGEu/view?usp=drive_link";
             const HOTEL_MAP_URL = "https://www.google.com/maps/search/?api=1&query=Shinjuku+Washington+Hotel+Main+Building";
             const EXHIBITION_MAP_URL = "https://www.google.com/maps/search/?api=1&query=IMAGINUS+Suginami+Science+Education+Center";
             const AIRPORT_MAP_URL = "https://www.google.com/maps/search/?api=1&query=Narita+Airport+Terminal+2";
@@ -144,14 +145,12 @@
                 ]
             };
 
-            // 頁籤切換置頂
             useEffect(() => {
                 if (mainRef.current) {
                     mainRef.current.scrollTo(0, 0);
                 }
             }, [activeTab]);
 
-            // 及時天氣獲取
             useEffect(() => {
                 const fetchWeather = async () => {
                     setIsWeatherLoading(true);
@@ -193,7 +192,6 @@
                 fetchWeather();
             }, []);
 
-            // 倒數計時
             useEffect(() => {
                 const targetDate = new Date('2026-03-19T12:50:00').getTime();
                 const timer = setInterval(() => {
@@ -348,24 +346,22 @@
                             <div className="space-y-6 fade-in pb-10 text-gray-800">
                                 <h2 className="text-2xl font-serif-tc font-bold px-2 flex items-center gap-2 tracking-wide text-stone-800"><SafeIcon name="navigation" className="text-slate-600" size={24} /> 交通路徑導航</h2>
                                 
-                                {/* 建議時刻表 */}
                                 <div className="bg-slate-700 rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden">
                                     <div className="flex items-center gap-2 mb-4 text-white relative z-10 font-bold"><SafeIcon name="clock" size={20} className="text-slate-300" /><h4 className="font-black text-lg">2026 N'EX 建議時刻表</h4></div>
                                     <div className="space-y-6 relative z-10 text-white">
-                                        <div className="bg-white/10 p-5 rounded-3xl border border-white/10 text-white text-white">
+                                        <div className="bg-white/10 p-5 rounded-3xl border border-white/10 text-white">
                                             <p className="text-sm font-black text-blue-100 uppercase mb-3 flex items-center gap-2"><SafeIcon name="plane" size={14} /> 3/19 抵達建議 (機場→新宿)</p>
-                                            <div className="space-y-3 text-white">{NEX_TIMETABLE.arrival.map((train, idx) => (<div key={idx} className="flex justify-between items-center bg-white/5 p-3 rounded-xl text-white"><div><p className="text-xs font-black text-blue-200">{train.id}</p><p className="text-base font-bold">{train.dep} → {train.arr}</p></div><span className="text-[11px] font-black bg-blue-400 text-white px-2 py-0.5 rounded-md">{train.note}</span></div>))}</div>
+                                            <div className="space-y-3">{NEX_TIMETABLE.arrival.map((train, idx) => (<div key={idx} className="flex justify-between items-center bg-white/5 p-3 rounded-xl"><div><p className="text-xs font-black text-blue-200">{train.id}</p><p className="text-base font-bold">{train.dep} → {train.arr}</p></div><span className="text-[11px] font-black bg-blue-400 text-white px-2 py-0.5 rounded-md">{train.note}</span></div>))}</div>
                                         </div>
-                                        <div className="bg-white/10 p-5 rounded-3xl border border-white/10 text-white text-white">
+                                        <div className="bg-white/10 p-5 rounded-3xl border border-white/10 text-white">
                                             <p className="text-sm font-black text-blue-100 uppercase mb-3 flex items-center gap-2"><SafeIcon name="arrow-right-left" size={14} /> 3/22 返程建議 (新宿→機場)</p>
-                                            <div className="space-y-3 text-white">{NEX_TIMETABLE.departure.map((train, idx) => (<div key={idx} className="flex justify-between items-center bg-white/5 p-3 rounded-xl text-white"><div><p className="text-xs font-black text-blue-200">{train.id}</p><p className="text-base font-bold">{train.dep} → {train.arr}</p></div><span className="text-[11px] font-black bg-indigo-400 text-white px-2 py-0.5 rounded-md">{train.note}</span></div>))}</div>
+                                            <div className="space-y-3">{NEX_TIMETABLE.departure.map((train, idx) => (<div key={idx} className="flex justify-between items-center bg-white/5 p-3 rounded-xl"><div><p className="text-xs font-black text-blue-200">{train.id}</p><p className="text-base font-bold">{train.dep} → {train.arr}</p></div><span className="text-[11px] font-black bg-indigo-400 text-white px-2 py-0.5 rounded-md">{train.note}</span></div>))}</div>
                                         </div>
-                                        <a href="https://www.jreast-timetable.jp/timetable/list0000/0002.html" target="_blank" className="w-full bg-white text-slate-800 py-3 rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all text-gray-800 font-bold">官方時刻表備案 <SafeIcon name="external-link" size={14} /></a>
+                                        <a href="https://www.jreast-timetable.jp/timetable/list0000/0002.html" target="_blank" className="w-full bg-white text-slate-800 py-3 rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all font-bold">官方時刻表備案 <SafeIcon name="external-link" size={14} /></a>
                                     </div>
-                                    <div className="absolute bottom-[-10%] right-[-10%] opacity-10 text-white text-white"><SafeIcon name="plane" size={180} /></div>
+                                    <div className="absolute bottom-[-10%] right-[-10%] opacity-10 text-white"><SafeIcon name="plane" size={180} /></div>
                                 </div>
 
-                                {/* 去程：機場 -> 飯店 */}
                                 <div className="bg-white rounded-3xl p-6 shadow-md border border-stone-100 text-gray-800">
                                     <div className="flex items-center gap-3 mb-6"><div className="w-12 h-12 bg-stone-100 rounded-xl flex items-center justify-center text-stone-600 shadow-sm"><SafeIcon name="plane" size={24} /></div><h4 className="font-black text-xl text-stone-800 font-serif-tc">去程：機場 {"->"} 飯店</h4></div>
                                     <div className="space-y-8 relative ml-4 border-l border-dashed border-stone-300 pl-8 text-[15px]">
@@ -376,75 +372,49 @@
                                         </div>
                                         <div className="relative">
                                             <div className="absolute -left-[45px] top-0 w-7 h-7 rounded-full bg-slate-400 border-[3px] border-white shadow-sm flex items-center justify-center text-white"><SafeIcon name="map-pin" size={12} className="text-white" /></div>
-                                            <p className="font-bold text-lg text-stone-800 font-serif-tc text-gray-800">搭乘 N'EX 直達新宿站</p>
+                                            <p className="font-bold text-lg text-stone-800 font-serif-tc">搭乘 N'EX 直達新宿站</p>
                                         </div>
                                         <div className="relative">
                                             <div className="absolute -left-[45px] top-0 w-7 h-7 rounded-full bg-stone-400 border-[3px] border-white shadow-sm flex items-center justify-center text-white"><SafeIcon name="footprints" size={12} className="text-white" /></div>
-                                            <p className="font-bold text-lg text-stone-800 font-serif-tc text-gray-800">步行至飯店</p><p className="mt-2 text-sm text-stone-600 font-bold leading-relaxed text-stone-800">沿都廳走地下道 <span className="font-black underline decoration-blue-300 text-gray-800">「One Day Street」</span>。</p>
-                                            <a href={HOTEL_MAP_URL} target="_blank" className="mt-4 inline-flex items-center gap-2 text-white font-bold bg-slate-700 px-6 py-3 rounded-xl shadow-md w-full justify-center active:scale-95 transition-all font-bold text-white">前往飯店導航 <SafeIcon name="external-link" size={18} /></a></div>
+                                            <p className="font-bold text-lg text-stone-800 font-serif-tc">步行至飯店</p><p className="mt-2 text-sm text-stone-600 font-bold leading-relaxed">沿都廳走地下道 <span className="font-black underline decoration-blue-300">「One Day Street」</span>。</p>
+                                            <a href={HOTEL_MAP_URL} target="_blank" className="mt-4 inline-flex items-center gap-2 text-white font-bold bg-slate-700 px-6 py-3 rounded-xl shadow-md w-full justify-center active:scale-95 transition-all">前往飯店導航 <SafeIcon name="external-link" size={18} /></a></div>
                                     </div>
                                 </div>
 
-                                {/* 3/20 展場往返 */}
                                 <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-gray-800 font-bold">
                                     <div className="flex items-center gap-3 mb-6"><div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 shadow-sm"><SafeIcon name="navigation" size={24} /></div><h4 className="font-black text-xl text-stone-800 font-serif-tc">3/20 展場往返</h4></div>
                                     <div className="bg-orange-50/50 p-6 rounded-3xl border border-orange-100 mb-4 text-gray-800">
                                         <p className="text-sm font-black text-orange-600 uppercase mb-3 text-center">目標：IMAGINUS 展場</p>
-                                        <ul className="space-y-2 text-base font-bold mb-4 text-gray-800 text-gray-800">
+                                        <ul className="space-y-2 text-base font-bold mb-4">
                                             <li>● 前往新宿站 11 / 12 月台。</li>
                                             <li>● 搭乘 JR 中央線(快速)至高圓寺站。</li>
                                         </ul>
-                                        <a href={EXHIBITION_MAP_URL} target="_blank" className="inline-flex items-center gap-2 text-white font-bold bg-orange-600 px-6 py-3 rounded-xl shadow-md active:bg-orange-700 w-full justify-center font-bold text-white text-white">前往展場導航 <SafeIcon name="external-link" size={18} /></a>
+                                        <a href={EXHIBITION_MAP_URL} target="_blank" className="inline-flex items-center gap-2 text-white font-bold bg-orange-600 px-6 py-3 rounded-xl shadow-md active:bg-orange-700 w-full justify-center">前往展場導航 <SafeIcon name="external-link" size={18} /></a>
                                     </div>
-                                    <a href={HOTEL_MAP_URL} target="_blank" className="inline-flex items-center gap-2 text-blue-600 font-bold bg-white border border-blue-200 px-6 py-3 rounded-xl shadow-sm w-full justify-center text-center font-bold text-blue-600 text-blue-600">返回飯店導航 <SafeIcon name="external-link" size={18} /></a>
+                                    <a href={HOTEL_MAP_URL} target="_blank" className="inline-flex items-center gap-2 text-blue-600 font-bold bg-white border border-blue-200 px-6 py-3 rounded-xl shadow-sm w-full justify-center text-center">返回飯店導航 <SafeIcon name="external-link" size={18} /></a>
                                 </div>
 
-                                {/* 3/22 回程：飯店 -> 機場 (N'EX 詳細指南) */}
-                                <div className="bg-stone-800 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden text-white">
-                                    <div className="relative z-10 text-white text-white">
+                                <div className="bg-stone-800 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
+                                    <div className="relative z-10 text-white">
                                         <div className="flex items-center gap-3 mb-6">
-                                            <div className="w-12 h-12 bg-indigo-500 rounded-xl flex items-center justify-center text-white shadow-lg text-white text-white"><SafeIcon name="arrow-right-left" size={24} className="text-white text-white" /></div>
-                                            <h4 className="font-black text-2xl font-serif-tc text-white text-white text-white">3/22 回程搭乘 N'EX</h4>
+                                            <div className="w-12 h-12 bg-indigo-500 rounded-xl flex items-center justify-center text-white shadow-lg"><SafeIcon name="arrow-right-left" size={24} className="text-white" /></div>
+                                            <h4 className="font-black text-2xl font-serif-tc text-white">3/22 回程搭乘 N'EX</h4>
                                         </div>
-                                        
-                                        <div className="space-y-6 text-white text-white">
-                                            <div className="bg-white/10 p-6 rounded-3xl border border-white/10 text-white text-white">
-                                                <div className="flex items-center gap-2 text-indigo-300 mb-3">
-                                                    <SafeIcon name="info" size={18} />
-                                                    <span className="font-bold text-sm uppercase tracking-widest text-indigo-200">假日乘車提醒</span>
-                                                </div>
-                                                
+                                        <div className="space-y-6">
+                                            <div className="bg-white/10 p-6 rounded-3xl border border-white/10">
+                                                <div className="flex items-center gap-2 text-indigo-300 mb-3"><SafeIcon name="info" size={18} /><span className="font-bold text-sm uppercase tracking-widest text-indigo-200">假日乘車提醒</span></div>
                                                 <div className="space-y-5 text-[15px] font-bold">
-                                                    <div className="flex gap-3">
-                                                        <div className="w-6 h-6 rounded-full bg-indigo-500 flex-shrink-0 flex items-center justify-center text-xs">1</div>
-                                                        <p>從飯店 1 樓出發，進入地下道 <span className="underline decoration-indigo-400">One Day Street</span> 往新宿站方向。</p>
-                                                    </div>
-                                                    <div className="flex gap-3">
-                                                        <div className="w-6 h-6 rounded-full bg-indigo-500 flex-shrink-0 flex items-center justify-center text-xs">2</div>
-                                                        <p>步行約 15 分鐘，進入 <span className="text-amber-400 font-black">「JR 新宿站－南口 (South Gate)」</span>。假日人潮眾多，請預留充足時間。</p>
-                                                    </div>
-                                                    <div className="flex gap-3">
-                                                        <div className="w-6 h-6 rounded-full bg-indigo-500 flex-shrink-0 flex items-center justify-center text-xs">3</div>
-                                                        <p>進站後，依照標示尋找 <span className="bg-red-600 px-1.5 py-0.5 rounded text-white font-black">N'EX / 成田特快</span> 指引。</p>
-                                                    </div>
-                                                    <div className="flex gap-3">
-                                                        <div className="w-6 h-6 rounded-full bg-indigo-500 flex-shrink-0 flex items-center justify-center text-xs">4</div>
-                                                        <p>目標月台為 <span className="text-amber-400 font-black text-lg underline">5、6 號月台</span> (位於車站最南端)。</p>
-                                                    </div>
+                                                    <div className="flex gap-3"><div className="w-6 h-6 rounded-full bg-indigo-500 flex-shrink-0 flex items-center justify-center text-xs">1</div><p>從飯店出發，進入地下道 <span className="underline decoration-indigo-400">One Day Street</span> 往新宿站方向。</p></div>
+                                                    <div className="flex gap-3"><div className="w-6 h-6 rounded-full bg-indigo-500 flex-shrink-0 flex items-center justify-center text-xs">2</div><p>抵達 <span className="text-amber-400 font-black">「JR 新宿站－南口 (South Gate)」</span>。週末人潮眾多，請預留充足時間。</p></div>
+                                                    <div className="flex gap-3"><div className="w-6 h-6 rounded-full bg-indigo-500 flex-shrink-0 flex items-center justify-center text-xs">3</div><p>進站後，依照標示尋找 <span className="bg-red-600 px-1.5 py-0.5 rounded text-white font-black">N'EX / 成田特快</span> 指引。</p></div>
+                                                    <div className="flex gap-3"><div className="w-6 h-6 rounded-full bg-indigo-500 flex-shrink-0 flex items-center justify-center text-xs">4</div><p>目標月台為 <span className="text-amber-400 font-black text-lg underline">5、6 號月台</span> (位於車站最南端)。</p></div>
                                                 </div>
-
-                                                <div className="mt-6 p-4 bg-white/5 rounded-2xl border border-white/10 text-[13px] text-stone-300 leading-relaxed">
-                                                    <p className="flex items-center gap-2 mb-1 text-white font-bold"><SafeIcon name="clock" size={14} /> 重要：3/22 為週日</p>
-                                                    5、6 號月台距離南口閘門較遠。考量週末拖行行李的不便，建議於發車前 20 分鐘抵達月台。
-                                                </div>
+                                                <div className="mt-6 p-4 bg-white/5 rounded-2xl border border-white/10 text-[13px] text-stone-300">考量拖行行李的不便，建議於發車前 20 分鐘抵達月台。</div>
                                             </div>
-                                            
-                                            <a href={AIRPORT_MAP_URL} target="_blank" className="inline-flex items-center gap-2 text-stone-800 font-bold bg-white px-6 py-4 rounded-xl shadow-md w-full justify-center active:scale-95 transition-all text-gray-800 text-[15px] font-bold">
-                                                前往成田二航導航 <SafeIcon name="external-link" size={18} />
-                                            </a>
+                                            <a href={AIRPORT_MAP_URL} target="_blank" className="inline-flex items-center gap-2 text-stone-800 font-bold bg-white px-6 py-4 rounded-xl shadow-md w-full justify-center active:scale-95 transition-all text-[15px]">前往成田二航導航 <SafeIcon name="external-link" size={18} /></a>
                                         </div>
                                     </div>
-                                    <div className="absolute bottom-[-10%] right-[-10%] opacity-10 text-white text-white text-white"><SafeIcon name="plane" size={180} /></div>
+                                    <div className="absolute bottom-[-10%] right-[-10%] opacity-10 text-white"><SafeIcon name="plane" size={180} /></div>
                                 </div>
                             </div>
                         );
@@ -459,12 +429,7 @@
                                     </div>
                                 </div>
 
-                                <div className="px-2 pt-2">
-                                    <h3 className="text-xl font-serif-tc font-bold text-stone-800 mb-4 flex items-center gap-2">
-                                        <SafeIcon name="utensils" size={22} className="text-amber-600" /> 平價人氣美食
-                                    </h3>
-                                </div>
-
+                                <div className="px-2 pt-2"><h3 className="text-xl font-serif-tc font-bold text-stone-800 mb-4 flex items-center gap-2"><SafeIcon name="utensils" size={22} className="text-amber-600" /> 平價人氣美食</h3></div>
                                 {[
                                     { name: "ねぎし (Negishi) 牛舌", tag: "商務首選", desc: "炭烤牛舌定食，附贈山藥泥與麥飯", transport: "從飯店步行約 12 分鐘，或由西口 21 號搭乘 WE Bus 至「新宿站西口」步行 2 分即可。", link: FOOD_LINKS.negishi },
                                     { name: "風雲兒 (Fuunji) 沾麵", tag: "排隊名店", desc: "西新宿排隊王，濃郁魚介雞白湯沾麵", transport: "從飯店步行僅約 8 分鐘即可抵達，位於西新宿區域。", link: FOOD_LINKS.fuunji },
@@ -472,69 +437,35 @@
                                     { name: "牛かつ もと村 炸牛排", tag: "超高評價", desc: "外酥內嫩炸牛排，可在石板上加熱熟度", transport: "從飯店步行約 12 分鐘，位於新宿南口斜坡巷弄中。", link: FOOD_LINKS.motomura },
                                     { name: "麵屋武藏 二天", tag: "男性喜愛", desc: "大份量厚實滷五花肉拉麵，武士主題風格", transport: "從飯店步行約 15 分鐘，位於新宿站西口繁華商業街。", link: FOOD_LINKS.musashi }
                                 ].map((food, i) => (
-                                    <div key={i} className="bg-white rounded-3xl p-6 shadow-soft border border-stone-100 flex flex-col gap-4 text-gray-800 font-bold">
+                                    <div key={i} className="bg-white rounded-3xl p-6 shadow-soft border border-stone-100 flex flex-col gap-4">
                                         <div className="flex justify-between items-start">
-                                            <div className="flex-1">
-                                                <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-stone-100 text-stone-500 mb-2 inline-block`}>{food.tag}</span>
-                                                <h4 className="font-bold text-xl text-stone-800 font-serif-tc">{food.name}</h4>
-                                                <p className="text-sm text-stone-500 font-medium mt-1">{food.desc}</p>
-                                            </div>
+                                            <div className="flex-1"><span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-stone-100 text-stone-500 mb-2 inline-block`}>{food.tag}</span><h4 className="font-bold text-xl text-stone-800 font-serif-tc">{food.name}</h4><p className="text-sm text-stone-500 font-medium mt-1">{food.desc}</p></div>
                                             <div className="w-12 h-12 bg-stone-100 text-stone-400 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm"><SafeIcon name="utensils" size={20} /></div>
                                         </div>
                                         <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-stone-100">
                                             <p className="text-xs font-bold text-stone-400 tracking-widest mb-1.5 flex items-center gap-1.5"><SafeIcon name="footprints" size={12} /> 步行指引</p>
                                             <p className="text-[14px] text-stone-600 font-bold leading-relaxed">{food.transport}</p>
                                         </div>
-                                        <div className="pt-1 flex justify-end">
-                                            <a href={food.link} target="_blank" className="inline-flex items-center gap-2 bg-slate-700 text-white px-5 py-2.5 rounded-xl font-bold text-[14px] shadow-sm active:scale-95 transition-all text-white font-bold">前往導航 <SafeIcon name="navigation" size={14} /></a>
-                                        </div>
+                                        <div className="pt-1 flex justify-end"><a href={food.link} target="_blank" className="inline-flex items-center gap-2 bg-slate-700 text-white px-5 py-2.5 rounded-xl font-bold text-[14px] shadow-sm">前往導航 <SafeIcon name="navigation" size={14} /></a></div>
                                     </div>
                                 ))}
 
-                                <div className="py-6 flex items-center gap-4 px-2">
-                                    <div className="h-[1px] flex-1 bg-stone-200"></div>
-                                    <span className="text-stone-300 font-bold tracking-widest text-xs uppercase">Discovery</span>
-                                    <div className="h-[1px] flex-1 bg-stone-200"></div>
-                                </div>
-
-                                <div className="px-2">
-                                    <h3 className="text-xl font-serif-tc font-bold text-stone-800 mb-4 flex items-center gap-2">
-                                        <SafeIcon name="camera" size={22} className="text-blue-600" /> 精選推薦景點
-                                    </h3>
-                                </div>
-
+                                <div className="py-6 flex items-center gap-4 px-2"><div className="h-[1px] flex-1 bg-stone-200"></div><span className="text-stone-300 font-bold tracking-widest text-xs uppercase">Discovery</span><div className="h-[1px] flex-1 bg-stone-200"></div></div>
+                                <div className="px-2"><h3 className="text-xl font-serif-tc font-bold text-stone-800 mb-4 flex items-center gap-2"><SafeIcon name="camera" size={22} className="text-blue-600" /> 精選推薦景點</h3></div>
                                 {[
-                                    { 
-                                        name: "新宿御苑", 
-                                        tag: "都市綠洲", 
-                                        desc: "橫跨新宿與澀谷的超大公園，融合日式、法式、英式庭園風格，是商務行程中呼吸新鮮空氣的首選。", 
-                                        transport: "從飯店步行約 15-20 分鐘即可到達新宿門（主入口）。", 
-                                        link: ATTRACTION_LINKS.gyoen 
-                                    },
-                                    { 
-                                        name: "中野百老匯", 
-                                        tag: "御宅聖地", 
-                                        desc: "Nakano Broadway 是次文化、動漫收藏品與懷舊商品的殿堂，即使不買東西也極具視覺衝擊力。", 
-                                        transport: "由新宿站搭乘 JR 中央線(快速)僅需一站(5分)抵達中野站，由北口商店街直走到底即是。", 
-                                        link: ATTRACTION_LINKS.broadway 
-                                    }
+                                    { name: "新宿御苑", tag: "都市綠洲", desc: "橫跨新宿與澀谷的超大公園，融合日式、法式、英式庭園風格。", transport: "從飯店步行約 15-20 分鐘即可到達新宿門（主入口）。", link: ATTRACTION_LINKS.gyoen },
+                                    { name: "中野百老匯", tag: "御宅聖地", desc: "Nakano Broadway 是次文化、動漫收藏品與懷舊商品的殿堂。", transport: "新宿站搭乘 JR 中央線僅需一站(5分)抵達中野站。", link: ATTRACTION_LINKS.broadway }
                                 ].map((attr, i) => (
-                                    <div key={i} className="bg-white rounded-3xl p-6 shadow-soft border border-stone-100 flex flex-col gap-4 text-gray-800 font-bold">
+                                    <div key={i} className="bg-white rounded-3xl p-6 shadow-soft border border-stone-100 flex flex-col gap-4">
                                         <div className="flex justify-between items-start">
-                                            <div className="flex-1">
-                                                <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-blue-50 text-blue-500 mb-2 inline-block`}>{attr.tag}</span>
-                                                <h4 className="font-bold text-xl text-stone-800 font-serif-tc">{attr.name}</h4>
-                                                <p className="text-sm text-stone-500 font-medium mt-1 leading-relaxed">{attr.desc}</p>
-                                            </div>
+                                            <div className="flex-1"><span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-blue-50 text-blue-500 mb-2 inline-block`}>{attr.tag}</span><h4 className="font-bold text-xl text-stone-800 font-serif-tc">{attr.name}</h4><p className="text-sm text-stone-500 font-medium mt-1 leading-relaxed">{attr.desc}</p></div>
                                             <div className="w-12 h-12 bg-blue-50 text-blue-400 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm"><SafeIcon name="camera" size={20} /></div>
                                         </div>
                                         <div className="bg-blue-50/30 p-4 rounded-2xl border border-blue-100/50">
                                             <p className="text-xs font-bold text-blue-400 tracking-widest mb-1.5 flex items-center gap-1.5"><SafeIcon name="train" size={12} /> 前往方式</p>
                                             <p className="text-[14px] text-stone-600 font-bold leading-relaxed">{attr.transport}</p>
                                         </div>
-                                        <div className="pt-1 flex justify-end">
-                                            <a href={attr.link} target="_blank" className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-[14px] shadow-md active:scale-95 transition-all text-white font-bold">開啟導航 <SafeIcon name="navigation" size={14} /></a>
-                                        </div>
+                                        <div className="pt-1 flex justify-end"><a href={attr.link} target="_blank" className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-[14px] shadow-md">開啟導航 <SafeIcon name="navigation" size={14} /></a></div>
                                     </div>
                                 ))}
                             </div>
@@ -542,24 +473,58 @@
 
                     case 'tickets':
                         return (
-                            <div className="space-y-6 fade-in pb-10 text-stone-800 font-medium font-bold text-gray-800">
-                                <h2 className="text-2xl font-serif-tc font-bold px-2 flex items-center gap-2 uppercase tracking-wide text-stone-800 font-bold"><SafeIcon name="ticket" className="text-amber-600" size={24} /> 門票領取</h2>
+                            <div className="space-y-6 fade-in pb-10 text-stone-800 font-bold text-gray-800">
+                                <h2 className="text-2xl font-serif-tc font-bold px-2 flex items-center gap-2 uppercase tracking-wide text-stone-800 font-bold"><SafeIcon name="ticket" className="text-amber-600" size={24} /> 票券憑證</h2>
+                                
                                 <div className="bg-white rounded-3xl p-6 shadow-soft border border-amber-100/50 text-gray-800 font-bold">
-                                    <div className="flex items-center gap-3 mb-6"><div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-lg text-white"><SafeIcon name="qr-code" size={24} /></div><h4 className="font-bold text-xl text-stone-800 font-serif-tc">Lawson / MINISTOP</h4></div>
-                                    <div className="space-y-8 relative ml-4 border-l border-dashed border-stone-200 pl-8 text-[15px] text-stone-800 leading-relaxed font-bold">
+                                    <div className="flex items-center gap-3 mb-6"><div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-lg"><SafeIcon name="qr-code" size={24} /></div><h4 className="font-bold text-xl text-stone-800 font-serif-tc">Lawson / MINISTOP</h4></div>
+                                    <div className="space-y-8 relative ml-4 border-l border-dashed border-stone-200 pl-8 text-[15px] leading-relaxed">
                                         <div className="relative">
-                                            <div className="absolute -left-[45px] top-0 w-7 h-7 rounded-full bg-slate-600 border-[3px] border-white shadow-sm flex items-center justify-center text-white text-white"><SafeIcon name="smartphone" size={12} className="text-white text-white" /></div>
+                                            <div className="absolute -left-[45px] top-0 w-7 h-7 rounded-full bg-slate-600 border-[3px] border-white shadow-sm flex items-center justify-center text-white"><SafeIcon name="smartphone" size={12} /></div>
                                             <p className="font-bold text-lg">步驟 1：開啟憑證</p>
-                                            <a href={TICKET_QR_URL} target="_blank" className="mt-3 inline-flex items-center justify-center gap-2 bg-slate-700 text-white px-6 py-4 rounded-xl font-bold text-[15px] shadow-sm active:bg-blue-700 transition-colors w-full font-bold text-white text-white">開啟QR證畫面 <SafeIcon name="chevron-right" size={16} /></a>
+                                            <a href={TICKET_QR_URL} target="_blank" className="mt-3 inline-flex items-center justify-center gap-2 bg-slate-700 text-white px-6 py-4 rounded-xl font-bold text-[15px] shadow-sm w-full transition-colors">開啟QR證畫面 <SafeIcon name="chevron-right" size={16} /></a>
                                         </div>
-                                        <div className="relative font-bold text-gray-800">
-                                            <div className="absolute -left-[45px] top-0 w-7 h-7 rounded-full bg-stone-400 border-[3px] border-white shadow-sm flex items-center justify-center text-white text-white"><SafeIcon name="scan-line" size={12} className="text-white text-white" /></div>
-                                            <p className="font-bold text-lg">步驟 2：掃描代碼</p><p className="mt-2 text-stone-700 font-bold">首頁選「Loppi専用コードをお持ちの方」後掃描。</p>
+                                        <div className="relative">
+                                            <div className="absolute -left-[45px] top-0 w-7 h-7 rounded-full bg-stone-400 border-[3px] border-white shadow-sm flex items-center justify-center text-white"><SafeIcon name="scan-line" size={12} /></div>
+                                            <p className="font-bold text-lg">步驟 2：掃描代碼</p><p className="mt-2 text-stone-700">首頁選「Loppi専用コードをお持ちの方」後掃描。</p>
                                         </div>
-                                        <div className="relative font-bold text-gray-800">
-                                            <div className="absolute -left-[45px] top-0 w-7 h-7 rounded-full bg-stone-300 border-[3px] border-white shadow-sm flex items-center justify-center text-white text-white"><SafeIcon name="ticket" size={12} className="text-white text-white" /></div>
-                                            <p className="font-bold text-lg">步驟 3：櫃檯換票</p><p className="mt-2 text-stone-700 font-bold underline decoration-red-400 pb-0.5">印出「申込券」於 30 分鐘內領票。</p>
+                                        <div className="relative">
+                                            <div className="absolute -left-[45px] top-0 w-7 h-7 rounded-full bg-stone-300 border-[3px] border-white shadow-sm flex items-center justify-center text-white"><SafeIcon name="ticket" size={12} /></div>
+                                            <p className="font-bold text-lg">步驟 3：櫃檯換票</p><p className="mt-2 text-stone-700 underline decoration-red-400 pb-0.5">印出「申込券」於 30 分鐘內領票。</p>
                                         </div>
+                                    </div>
+                                </div>
+
+                                <div className="py-4 flex items-center gap-4 px-2"><div className="h-[1px] flex-1 bg-stone-200"></div><span className="text-stone-300 font-bold tracking-widest text-[10px] uppercase">Transport Tickets</span><div className="h-[1px] flex-1 bg-stone-200"></div></div>
+
+                                <div className="bg-white rounded-3xl p-6 shadow-soft border border-indigo-100 text-gray-800 font-bold">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg"><SafeIcon name="train" size={24} /></div>
+                                        <h4 className="font-bold text-xl text-stone-800 font-serif-tc">JR N'EX 車票領取</h4>
+                                    </div>
+                                    <div className="space-y-6">
+                                        <div className="bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100">
+                                            <div className="flex items-center gap-2 text-indigo-600 mb-3 font-bold"><SafeIcon name="info" size={18} /><span className="font-bold text-sm uppercase tracking-widest">機器識別與位置指南</span></div>
+                                            <ul className="space-y-3.5 text-[14px] text-stone-700 font-bold leading-relaxed">
+                                                <li className="flex items-start gap-2">
+                                                    <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 flex-shrink-0 flex items-center justify-center text-[10px] mt-0.5">1</span>
+                                                    <span>新宿站**「南口 (South Gate)」**改札口**外側左方**，尋找上方掛有**紫色「指定席券売機」**標示的一排機器。</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 flex-shrink-0 flex items-center justify-center text-[10px] mt-0.5">2</span>
+                                                    <span>機器機身多為**深灰色/黑色**，螢幕右上角切換**「繁體中文」**。</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 flex-shrink-0 flex items-center justify-center text-[10px] mt-0.5">3</span>
+                                                    <span>點選螢幕上的**「讀取QR碼/領取已訂票券」**按鈕，並掃描下方憑證。</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 text-gray-800">
+                                            <p className="text-xs font-bold text-amber-600 tracking-widest mb-1.5 flex items-center gap-1.5 font-bold"><SafeIcon name="info" size={12} /> 車站位置提醒</p>
+                                            <p className="text-[13px] text-amber-800 leading-relaxed font-bold">南口位於車站 2 樓。領票後可直接進入南口改札，前往距離最近的 5、6 號月台。</p>
+                                        </div>
+                                        <a href={TRAIN_TICKET_URL} target="_blank" className="mt-2 inline-flex items-center justify-center gap-2 bg-indigo-600 text-white px-6 py-4 rounded-xl font-bold text-[15px] shadow-md w-full">開啟車票 QR 憑證 <SafeIcon name="external-link" size={16} /></a>
                                     </div>
                                 </div>
                             </div>
@@ -573,16 +538,12 @@
                 <div className="max-w-md mx-auto h-[100dvh] flex flex-col relative overflow-hidden bg-[#F5F4F0]">
                     <header className="bg-[#F5F4F0]/95 backdrop-blur-md px-6 pt-6 pb-4 flex justify-between items-center z-20 shadow-sm border-b border-stone-200/50">
                         <div className="flex items-center gap-3 text-stone-800">
-                            <div className="w-10 h-10 bg-stone-800 rounded-[14px] flex items-center justify-center text-white font-serif-tc font-bold text-sm shadow-sm tracking-widest text-white">TO</div>
-                            <div><h1 className="text-[17px] font-bold tracking-widest uppercase leading-none font-serif-tc text-stone-800 font-bold">TIGS 2026</h1></div>
+                            <div className="w-10 h-10 bg-stone-800 rounded-[14px] flex items-center justify-center text-white font-serif-tc font-bold text-sm shadow-sm tracking-widest">TO</div>
+                            <div><h1 className="text-[17px] font-bold tracking-widest uppercase leading-none font-serif-tc">TIGS 2026</h1></div>
                         </div>
                         <div className="text-[10px] font-bold text-stone-400 border border-stone-200 px-2.5 py-1 rounded-lg tracking-widest bg-white">{VERSION}</div>
                     </header>
-                    
-                    <main ref={mainRef} className="flex-1 p-5 overflow-y-auto no-scrollbar pb-28 relative z-10 scroll-smooth">
-                        {renderContent()}
-                    </main>
-
+                    <main ref={mainRef} className="flex-1 p-5 overflow-y-auto no-scrollbar pb-28 relative z-10 scroll-smooth">{renderContent()}</main>
                     <nav className="fixed bottom-0 w-full max-w-md left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-xl border-t border-stone-200 flex justify-around px-2 pb-safe pt-2 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-[100]">
                         {[
                             { id: 'overview', icon: 'briefcase', label: '首頁' },
@@ -591,7 +552,7 @@
                             { id: 'tickets', icon: 'ticket', label: '門票' },
                             { id: 'food', icon: 'utensils', label: '美食' },
                         ].map((tab) => (
-                            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex flex-col items-center justify-center flex-1 py-2 transition-all duration-300 relative ${activeTab === tab.id ? 'text-slate-700 font-bold text-slate-700 font-bold' : 'text-stone-400 text-stone-400'}`}>
+                            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex flex-col items-center justify-center flex-1 py-2 transition-all duration-300 relative ${activeTab === tab.id ? 'text-slate-700 font-bold' : 'text-stone-400'}`}>
                                 <div className={`p-2 rounded-xl transition-all duration-300 ${activeTab === tab.id ? 'bg-slate-200/70' : 'bg-transparent'}`}>
                                     <SafeIcon name={tab.icon} size={22} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
                                 </div>
